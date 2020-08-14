@@ -5,19 +5,17 @@ RUN apt-get update && \
 
 RUN useradd -ms /bin/bash steam
 
-WORKDIR /home/steam
 
-USER steam
+#Steamcmd installation
+RUN mkdir -p /server/steamcmd
+RUN mkdir -p /server/csgo
+WORKDIR /server/steamcmd
+RUN wget http://media.steampowered.com/client/steamcmd_linux.tar.gz
+RUN tar -xvzf steamcmd_linux.tar.gz
 
-RUN wget -O /tmp/steamcmd_linux.tar.gz http://media.steampowered.com/installer/steamcmd_linux.tar.gz && \
-    tar -xvzf /tmp/steamcmd_linux.tar.gz && \
-    rm /tmp/steamcmd_linux.tar.gz
+#Server Start
+WORKDIR /server/csgo
+ADD start.sh /server/csgo/start.sh
+RUN chmod 755 /server/csgo/start.sh
 
-# Install CSGO
-RUN ./steamcmd.sh +login anonymous +force_install_dir ./csgo +app_update 740 validate +quit
-
-ENV CSS_HOSTNAME Counter-Strike GO Dedicated Server
-
-ADD ./entrypoint.sh entrypoint.sh
-RUN ln -s /home/steam/linux32/ /home/steam/.steam/sdk32
-CMD ./entrypoint.sh
+CMD ["/server/csgo/start.sh"]
